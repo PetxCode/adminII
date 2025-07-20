@@ -1,8 +1,8 @@
 
 import axios from "axios";
-const URL: string = "http://localhost:3300/api/v1"
+// const URL: string = "http://localhost:3300/api/v1"
 
-
+const URL: string = "https://pick-be.onrender.com/api/v1";
 export const getUsers = async () => {
   try {
     return await axios.get(`${URL}/all-user`).then((res) => {
@@ -76,6 +76,16 @@ export const getStudiosRequestStatus = async (
 export const getStudiosPayout = async () => {
   try {
     return await axios.get(`${URL}/read-payout/`).then((res) => {
+      return res.data;
+    });
+  } catch (error: any) {
+    return error.message;
+  }
+};
+
+export const getActivity = async () => {
+  try {
+    return await axios.get(`${URL}/read-activities/`).then((res) => {
       return res.data;
     });
   } catch (error: any) {

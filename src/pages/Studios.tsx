@@ -65,7 +65,7 @@ export default function Studios() {
           <Button variant="outline" className="border-border">
             Export Data
           </Button>
-          <Button className="bg-gradient-primary hover:bg-primary-hover">
+          <Button className="bg-[#8c0707] hover:bg-[#8c0707]/80">
             Review Pending
           </Button>
         </div>
@@ -109,18 +109,26 @@ export default function Studios() {
 
           <div className="flex border border-border rounded-lg overflow-hidden">
             <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
+              // variant=
               size="sm"
               onClick={() => setViewMode("grid")}
-              className="rounded-none"
+              className={`rounded-none hover:bg-transparent  ${
+                viewMode === "grid"
+                  ? "bg-[#8c0707] hover:bg-[#8c0707]/80"
+                  : "bg-white !text-gray-800 "
+              }`}
             >
               Grid
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              // variant={viewMode === "list" /? "default" : "ghost"}
               size="sm"
               onClick={() => setViewMode("list")}
-              className="rounded-none"
+              className={`rounded-none hover:bg-transparent ${
+                viewMode === "list"
+                  ? "bg-[#8c0707] hover:bg-[#8c0707]/80"
+                  : "bg-white !text-gray-800"
+              }`}
             >
               List
             </Button>
@@ -152,8 +160,16 @@ export default function Studios() {
                     alt={studio.studioName || "Studio"}
                     className="w-full h-48 object-cover rounded-t-lg"
                   />
-                  <div className="absolute top-3 left-3">
-                    {getStatusBadge(!studio.block ? "active" : "blocked")}
+                  <div className="absolute top-3 left-3 ">
+                    {/* {getStatusBadge(!studio.block ? "active" : "blocked")} */}
+                    <p
+                      className={`${
+                        !studio.block ? "bg-[#8c0707]" : "bg-orange-400"
+                      } text-white rounded-full px-4 capitalize text-[14px]`}
+                    >
+                      {!studio.block ? "active" : "blocked"}
+                    </p>
+                    {/* {(? "active" : "blocked")} */}
                   </div>
                   <div className="absolute top-3 right-3 bg-black/50 rounded-lg px-2 py-1">
                     <div className="flex items-center space-x-1 text-white text-sm">
@@ -181,7 +197,7 @@ export default function Studios() {
 
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
-                      <DollarSign className="w-4 h-4 text-primary" />
+                      <DollarSign className="w-4 h-4 text-[#8c0707]" />
                       <span className="font-semibold text-[14px]">
                         {studio.studioPrice?.toLocaleString() || 0}
                       </span>
@@ -190,7 +206,7 @@ export default function Studios() {
                       </span>
                     </div>
                     <div className="flex items-center">
-                      <DollarSign className="w-4 h-4 text-primary" />
+                      <DollarSign className="w-4 h-4 text-[#8c0707]" />
                       <span className="font-semibold text-[14px]">
                         {studio.studioPriceDaily?.toLocaleString() || 0}
                       </span>

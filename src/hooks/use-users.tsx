@@ -1,11 +1,17 @@
 import useSWR from 'swr';
-import { getStudios, getStudiosBookings, getStudiosBookingsRevenue, getStudiosOwner, getStudiosPayout, getUsers } from '../api/usersAPI';
-
+import {
+  getActivity,
+  getStudios,
+  getStudiosBookings,
+  getStudiosBookingsRevenue,
+  getStudiosOwner,
+  getStudiosPayout,
+  getUsers,
+} from "../api/usersAPI";
 
 export const useReadUsers = () => {
   const { data } = useSWR(`/get-users/`, () => {
-      return getUsers().then((res: any) => {
-      
+    return getUsers().then((res: any) => {
       return res.data;
     });
   });
@@ -14,10 +20,10 @@ export const useReadUsers = () => {
 };
 
 export const useReadStudios = () => {
-  const { data:studios } = useSWR(`/view-all-studios/`, () => {
-      return getStudios().then((res: any) => {
-        return res.data;
-      });
+  const { data: studios } = useSWR(`/view-all-studios/`, () => {
+    return getStudios().then((res: any) => {
+      return res.data;
+    });
   });
 
   return { studios };
@@ -33,10 +39,9 @@ export const useReadStudiosBookings = () => {
   return { bookings };
 };
 
-export const useReadStudiosOwner = (userID:string) => {
+export const useReadStudiosOwner = (userID: string) => {
   const { data: user } = useSWR(`/owner/${userID}`, () => {
     return getStudiosOwner(userID).then((res: any) => {
-    
       return res.data;
     });
   });
@@ -44,13 +49,15 @@ export const useReadStudiosOwner = (userID:string) => {
   return { user };
 };
 
-export const useReadStudiosRevenue = (userID:string) => {
-  const { data: studioRevenue } = useSWR(`/view-studio-booking/${userID}`, () => {
-    return getStudiosBookingsRevenue(userID).then((res: any) => {
-      
-      return res.data;
-    });
-  });
+export const useReadStudiosRevenue = (userID: string) => {
+  const { data: studioRevenue } = useSWR(
+    `/view-studio-booking/${userID}`,
+    () => {
+      return getStudiosBookingsRevenue(userID).then((res: any) => {
+        return res.data;
+      });
+    }
+  );
 
   return { studioRevenue };
 };
@@ -63,4 +70,14 @@ export const useReadStudiosPayout = () => {
   });
 
   return { payout, mutate };
+};
+
+export const useReadActivities = () => {
+  const { data: activities, mutate } = useSWR(`/view-activities`, () => {
+    return getActivity().then((res: any) => {
+      return res.data;
+    });
+  });
+
+  return { activities, mutate };
 };

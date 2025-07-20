@@ -26,6 +26,7 @@ import {
   XCircle,
   DollarSign,
 } from "lucide-react";
+import { useReadActivities } from "../hooks/use-users";
 
 const activityIcons = {
   user_signup: UserCheck,
@@ -53,113 +54,12 @@ const activityColors = {
   login: "text-primary",
 };
 
-const mockActivities = [
-  {
-    id: 1,
-    type: "user_signup",
-    title: "New User Registration",
-    description: "John Doe created a new account",
-    details: "Email: john.doe@example.com, Location: New York",
-    timestamp: new Date(Date.now() - 2 * 60 * 1000),
-    userId: "user_123",
-    metadata: { email: "john.doe@example.com", location: "New York" },
-  },
-  {
-    id: 2,
-    type: "studio_listed",
-    title: "Studio Listed",
-    description: "Creative Studio X was listed by Sarah Wilson",
-    details:
-      "Studio: Creative Studio X, Owner: Sarah Wilson, Location: Los Angeles",
-    timestamp: new Date(Date.now() - 15 * 60 * 1000),
-    studioId: "studio_456",
-    metadata: { studioName: "Creative Studio X", owner: "Sarah Wilson" },
-  },
-  {
-    id: 3,
-    type: "booking_completed",
-    title: "Booking Completed",
-    description: "Booking #1247 was successfully completed",
-    details: "Studio: Downtown Studio, Duration: 4 hours, Amount: $320",
-    timestamp: new Date(Date.now() - 60 * 60 * 1000),
-    bookingId: "booking_1247",
-    metadata: { amount: 320, duration: 4, studioName: "Downtown Studio" },
-  },
-  {
-    id: 4,
-    type: "payment_received",
-    title: "Payment Received",
-    description: "Payment of $450 received for Studio Y",
-    details: "Payment ID: pay_789, Studio: Studio Y, Fee: $45",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    paymentId: "pay_789",
-    metadata: { amount: 450, fee: 45, studioName: "Studio Y" },
-  },
-  {
-    id: 5,
-    type: "user_banned",
-    title: "User Account Suspended",
-    description: "User account mike.johnson@example.com was suspended",
-    details: "Reason: Multiple policy violations, Suspended by: Admin",
-    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-    userId: "user_789",
-    metadata: { reason: "Multiple policy violations", adminId: "admin_001" },
-  },
-  {
-    id: 6,
-    type: "payment_failed",
-    title: "Payment Failed",
-    description: "Payment attempt failed for booking #1248",
-    details: "Reason: Insufficient funds, Booking: Music Studio Pro",
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    paymentId: "pay_failed_123",
-    metadata: { reason: "Insufficient funds", bookingId: "booking_1248" },
-  },
-  {
-    id: 7,
-    type: "studio_banned",
-    title: "Studio Suspended",
-    description: "Studio 'Shady Recordings' was suspended",
-    details: "Reason: Quality violations, Suspended by: Admin",
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    studioId: "studio_999",
-    metadata: { reason: "Quality violations", adminId: "admin_001" },
-  },
-  {
-    id: 8,
-    type: "booking_cancelled",
-    title: "Booking Cancelled",
-    description: "Booking #1246 was cancelled by user",
-    details: "Studio: Rhythm Studios, Refund: $240, Reason: Schedule conflict",
-    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
-    bookingId: "booking_1246",
-    metadata: { refund: 240, reason: "Schedule conflict" },
-  },
-  {
-    id: 9,
-    type: "system_update",
-    title: "System Maintenance",
-    description: "Platform maintenance completed successfully",
-    details:
-      "Duration: 2 hours, Services updated: Payment gateway, Search engine",
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    metadata: { duration: 2, services: ["Payment gateway", "Search engine"] },
-  },
-  {
-    id: 10,
-    type: "login",
-    title: "Admin Login",
-    description: "Administrator logged into the system",
-    details: "Admin: admin@example.com, IP: 192.168.1.1",
-    timestamp: new Date(Date.now() - 25 * 60 * 60 * 1000),
-    adminId: "admin_001",
-    metadata: { ip: "192.168.1.1", userAgent: "Chrome 120.0" },
-  },
-];
-
-const getRelativeTime = (date: Date) => {
+const getRelativeTime = (date: Date | string | number) => {
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  const targetDate = new Date(date); // Convert to Date object
+  const diffInSeconds = Math.floor(
+    (now.getTime() - targetDate.getTime()) / 1000
+  );
 
   if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
   if (diffInSeconds < 3600)
@@ -174,17 +74,19 @@ export default function Activities() {
   const [selectedType, setSelectedType] = useState("all");
   const [selectedTimeframe, setSelectedTimeframe] = useState("all");
 
-  const filteredActivities = mockActivities.filter((activity) => {
+  const { activities } = useReadActivities();
+
+  const filteredActivities = activities?.filter((activity: any) => {
     const matchesSearch =
-      activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      activity.description.toLowerCase().includes(searchTerm.toLowerCase());
+      activity?.action?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.actionDetail?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType =
       selectedType === "all" || activity.type === selectedType;
 
     let matchesTimeframe = true;
     if (selectedTimeframe !== "all") {
       const now = new Date();
-      const activityTime = activity.timestamp;
+      const activityTime = new Date(activity.createdAt || activity.timestamp); // Handle both field names
       const diffInHours =
         (now.getTime() - activityTime.getTime()) / (1000 * 60 * 60);
 
@@ -206,29 +108,6 @@ export default function Activities() {
 
     return matchesSearch && matchesType && matchesTimeframe;
   });
-
-  const getActivityTypeBadge = (type: string) => {
-    const variants: Record<string, string> = {
-      user_signup: "bg-success/10 text-success border-success/20",
-      user_banned: "bg-destructive/10 text-destructive border-destructive/20",
-      studio_listed: "bg-primary/10 text-primary border-primary/20",
-      studio_banned: "bg-destructive/10 text-destructive border-destructive/20",
-      booking_completed: "bg-success/10 text-success border-success/20",
-      booking_cancelled: "bg-warning/10 text-warning border-warning/20",
-      payment_received: "bg-success/10 text-success border-success/20",
-      payment_failed:
-        "bg-destructive/10 text-destructive border-destructive/20",
-      system_update: "bg-muted text-muted-foreground border-border",
-      login: "bg-primary/10 text-primary border-primary/20",
-    };
-
-    return variants[type] || "bg-muted text-muted-foreground border-border";
-  };
-
-  const activityTypeCounts = mockActivities.reduce((acc, activity) => {
-    acc[activity.type] = (acc[activity.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
 
   return (
     <div className="space-y-6">
@@ -259,7 +138,7 @@ export default function Activities() {
             <div>
               <p className="text-sm text-muted-foreground">Total Activities</p>
               <p className="text-2xl font-bold text-foreground">
-                {mockActivities.length}
+                {filteredActivities?.length || 0}
               </p>
             </div>
           </div>
@@ -273,13 +152,12 @@ export default function Activities() {
             <div>
               <p className="text-sm text-muted-foreground">Last 24 Hours</p>
               <p className="text-2xl font-bold text-foreground">
-                {
-                  mockActivities.filter(
-                    (a) =>
-                      new Date().getTime() - a.timestamp.getTime() <=
-                      24 * 60 * 60 * 1000
-                  ).length
-                }
+                {filteredActivities?.filter(
+                  (a: any) =>
+                    new Date().getTime() -
+                      new Date(a.createdAt || a.timestamp).getTime() <=
+                    24 * 60 * 60 * 1000
+                )?.length || 0}
               </p>
             </div>
           </div>
@@ -293,12 +171,10 @@ export default function Activities() {
             <div>
               <p className="text-sm text-muted-foreground">Critical Events</p>
               <p className="text-2xl font-bold text-foreground">
-                {
-                  mockActivities.filter(
-                    (a) =>
-                      a.type.includes("banned") || a.type.includes("failed")
-                  ).length
-                }
+                {filteredActivities?.filter(
+                  (a: any) =>
+                    a.type?.includes("banned") || a.type?.includes("failed")
+                )?.length || 0}
               </p>
             </div>
           </div>
@@ -312,7 +188,9 @@ export default function Activities() {
             <div>
               <p className="text-sm text-muted-foreground">User Activities</p>
               <p className="text-2xl font-bold text-foreground">
-                {mockActivities.filter((a) => a.type.includes("user")).length}
+                {filteredActivities?.filter((a: any) =>
+                  a.type?.includes("user")
+                )?.length || 0}
               </p>
             </div>
           </div>
@@ -372,16 +250,16 @@ export default function Activities() {
       <Card className="bg-gradient-card shadow-card">
         <div className="p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">
-            Recent Activities ({filteredActivities.length})
+            Recent Activities ({filteredActivities?.length || 0})
           </h3>
 
           <div className="space-y-4">
-            {filteredActivities.map((activity) => {
+            {filteredActivities?.map((activity: any) => {
               const IconComponent =
-                activityIcons[activity.type as keyof typeof activityIcons] ||
+                activityIcons[activity?.type as keyof typeof activityIcons] ||
                 AlertCircle;
               const iconColor =
-                activityColors[activity.type as keyof typeof activityColors] ||
+                activityColors[activity?.type as keyof typeof activityColors] ||
                 "text-muted-foreground";
 
               return (
@@ -399,29 +277,48 @@ export default function Activities() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <h4 className="font-semibold text-foreground">
-                          {activity.title}
+                          {activity.action}
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {activity.description}
+                          {activity.actionDetail}
                         </p>
                       </div>
 
                       <div className="flex items-center space-x-2 ml-4">
                         <Badge
-                          className={`${getActivityTypeBadge(
-                            activity.type
-                          )} text-xs`}
+                          className={`${
+                            activity?.actionType === "Account Verification"
+                              ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                              : activity?.actionType ===
+                                "user signup using Email Provider"
+                              ? "bg-green-100 text-green-800 hover:bg-green-200"
+                              : activity?.actionType ===
+                                "user signup using Email Provider"
+                              ? "bg-green-100 text-green-700 hover:bg-green-200"
+                              : activity?.actionType === "Studio Booking"
+                              ? "bg-red-100 text-red-700 hover:bg-red-200"
+                              : activity?.actionType === "Studio Listing"
+                              ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                              : activity?.actionType === "Withdrawer Request"
+                              ? "bg-pink-100 text-pink-700 hover:bg-pink-200"
+                              : activity?.actionType ===
+                                "Withdrawer Request Status"
+                              ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                              : ""
+                          } text-xs`}
                         >
-                          {activity.type.replace("_", " ")}
+                          {activity?.actionType}
                         </Badge>
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {getRelativeTime(activity.timestamp)}
+                          {getRelativeTime(
+                            activity.createdAt || activity.timestamp
+                          )}
                         </span>
                       </div>
                     </div>
 
                     <p className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">
-                      {activity.details}
+                      {activity.actionInfo}
                     </p>
 
                     <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
@@ -440,7 +337,11 @@ export default function Activities() {
                         )}
                       </div>
 
-                      <span>{activity.timestamp.toLocaleString()}</span>
+                      <span>
+                        {new Date(
+                          activity.createdAt || activity.timestamp
+                        ).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -448,7 +349,7 @@ export default function Activities() {
             })}
           </div>
 
-          {filteredActivities.length === 0 && (
+          {(!filteredActivities || filteredActivities?.length === 0) && (
             <div className="text-center py-12">
               <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">
