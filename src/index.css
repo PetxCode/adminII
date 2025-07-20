@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Studio Booking Platform Admin Dashboard Design System */
+
+@layer base {
+  :root {
+    /* Core colors - Professional admin theme with white background */
+    --background: 0 0% 100%; /* Pure white */
+    --foreground: 0 0% 15%; /* Soft dark gray */
+
+    /* Cards and surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%; /* Soft dark gray */
+
+    /* Popover elements */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%; /* Soft dark gray */
+
+    /* Primary brand - Professional blue */
+    --primary: 219 90% 56%; /* blue-500 */
+    --primary-hover: 219 90% 48%; /* blue-600 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary elements */
+    --secondary: 226 71% 97%; /* blue-50 */
+    --secondary-hover: 221 83% 93%; /* blue-100 */
+    --secondary-foreground: 0 0% 20%; /* Soft dark gray */
+
+    /* Muted elements */
+    --muted: 220 14% 96%; /* gray-100 */
+    --muted-foreground: 0 0% 40%; /* Medium gray for less important text */
+
+    /* Accent colors */
+    --accent: 219 90% 96%; /* blue-50 */
+    --accent-foreground: 0 0% 15%; /* Soft dark gray */
+
+    /* Status colors */
+    --success: 142 69% 45%; /* green-600 */
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 50%; /* orange-500 */
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%; /* red-500 */
+    --destructive-foreground: 0 0% 100%;
+
+    /* UI elements */
+    --border: 220 13% 91%; /* gray-200 */
+    --input: 220 13% 91%;
+    --ring: 219 90% 56%;
+
+    /* Design system variables */
+    --radius: 0.75rem;
+
+    /* Gradients - Updated for white background */
+    --gradient-primary: linear-gradient(135deg, hsl(219 90% 56%), hsl(219 90% 48%));
+    --gradient-subtle: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 14% 98%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 14% 98%));
+
+    /* Shadows */
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-elevated: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-primary: 0 0 20px hsl(219 90% 56% / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Sidebar - White background theme with appealing dark text */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 15%; /* Soft dark gray */
+    --sidebar-primary: 219 90% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 226 71% 97%;
+    --sidebar-accent-foreground: 0 0% 20%; /* Soft dark gray */
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 219 90% 56%;
+  }
+}
+
+@layer components {
+  /* Enhanced button styles for admin dashboard */
+  .btn-admin-primary {
+    @apply bg-gradient-primary hover:bg-primary-hover text-primary-foreground shadow-primary/20 transition-fast;
+  }
+  
+  .btn-admin-secondary {
+    @apply bg-secondary hover:bg-secondary-hover text-gray-800 border border-border transition-fast;
+  }
+
+  /* White background utility classes */
+  .bg-white-clean {
+    @apply bg-white;
+  }
+
+  .surface-white {
+    @apply bg-white border border-gray-100 shadow-sm;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border ;
+  }
+
+  body {
+    @apply bg-white ;
+    font-family: Poppins
+  }
+
+  /* Force white background and appealing dark text on main containers */
+  html {
+    @apply bg-white;
+  }
+
+  #root {
+    @apply bg-white min-h-screen text-gray-800;
+  }
+
+  /* Ensure all text elements use appealing dark colors */
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-gray-900; /* Slightly darker for headings */
+  }
+  
+  p, span, div, a, label {
+    /* @apply text-gray-800; Main text color */
+  }
+  
+  button, input, textarea {
+    @apply text-gray-800;
+  }
+
+  /* Muted text for less important content */
+  .text-muted, .text-sm, small {
+    @apply text-gray-600;
+  }
+
+  /* Override any potential text color inheritance */
+  .text-foreground {
+    @apply text-gray-800 !important;
+  }
+}
