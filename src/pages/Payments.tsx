@@ -20,6 +20,7 @@ import {
 import { Search, Filter, MoreHorizontal, Check, X, Eye } from "lucide-react";
 import { useReadStudiosPayout, useReadUsers } from "../hooks/use-users";
 import { getStudiosRequestStatus } from "../api/usersAPI";
+import Pagination from "../lib/pagination";
 
 export default function Payments() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,6 +28,8 @@ export default function Payments() {
 
   const { data } = useReadUsers();
   const { payout, mutate } = useReadStudiosPayout();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Ensure payout is an array before filtering
   const safePayoutData = Array.isArray(payout) ? payout : [];
@@ -85,8 +88,21 @@ export default function Payments() {
     }
   };
 
+  const totalPages = Math.ceil(safePayoutData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredPayments.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    setCurrentPage(pageNumber);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-[calc(100vh-115px)] flex flex-col ">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -205,10 +221,10 @@ export default function Payments() {
       <Card className="bg-gradient-card shadow-card">
         <div className="p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">
-            Payments ({filteredPayments.length})
+            Payments ({currentItems?.length})
           </h3>
 
-          {filteredPayments.length === 0 ? (
+          {currentItems?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No payments found
             </div>
@@ -227,7 +243,7 @@ export default function Payments() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPayments.map((payment) => (
+                  {currentItems.map((payment) => (
                     <TableRow
                       key={payment._id}
                       className="border-border hover:bg-muted/50"
@@ -338,6 +354,14 @@ export default function Payments() {
           )}
         </div>
       </Card>
+      <div className="flex-1" />
+      <div className="mt-20">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 }

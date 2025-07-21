@@ -9,22 +9,37 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { Search, Filter, Star, MapPin, DollarSign, Eye } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Star,
+  MapPin,
+  DollarSign,
+  Eye,
+  MoreHorizontal,
+  Edit,
+  Ban,
+  LockOpen,
+} from "lucide-react";
 import {
   useReadStudios,
   useReadStudiosBookings,
   useReadStudiosOwner,
   useReadStudiosRevenue,
 } from "../hooks/use-users";
+import Pagination from "../lib/pagination";
+import { banStudio, unbanStudio } from "../api/usersAPI";
 
 export default function Studios() {
-  const { studios } = useReadStudios();
+  const { studios, mutate } = useReadStudios();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Fix: Provide fallback empty array to prevent undefined error
-  const filteredStudios = (studios || []).filter((studio) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  const filteredStudios = (studios || [])?.filter((studio: any) => {
     const matchesSearch =
       studio.studioName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       studio.studioAddress?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -32,24 +47,23 @@ export default function Studios() {
       statusFilter === "all" || studio.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+  // .slice(currentPage, itemsPerPage);
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      active: "default",
-      pending: "secondary",
-      suspended: "destructive",
-      banned: "destructive",
-    } as const;
+  const totalPages = Math.ceil(studios?.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredStudios?.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
-    return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
-        {status?.charAt(0).toUpperCase() + status?.slice(1)}
-      </Badge>
-    );
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    setCurrentPage(pageNumber);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-[calc(100vh-115px)] flex flex-col ">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -61,16 +75,12 @@ export default function Studios() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" className="border-border">
-            Export Data
-          </Button>
+        <div className="flex items-center space-x-3 opacity-10">
           <Button className="bg-[#8c0707] hover:bg-[#8c0707]/80">
-            Review Pending
+            Viewing studios
           </Button>
         </div>
       </div>
-
       {/* Filters */}
       <Card className="p-6 bg-gradient-card shadow-card">
         <div className="flex flex-col md:flex-row gap-4">
@@ -135,18 +145,17 @@ export default function Studios() {
           </div>
         </div>
       </Card>
-
       {/* Studios Display */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-foreground">
-            Studios ({filteredStudios.length})
+            Studios ({currentItems.length})
           </h3>
         </div>
 
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStudios.map((studio) => (
+            {currentItems.map((studio) => (
               <Card
                 key={studio.id}
                 className="bg-gradient-card shadow-card hover:shadow-elevated transition-all duration-300"
@@ -165,9 +174,23 @@ export default function Studios() {
                     <p
                       className={`${
                         !studio.block ? "bg-[#8c0707]" : "bg-orange-400"
-                      } text-white rounded-full px-4 capitalize text-[14px]`}
+                      } 
+
+                      ${
+                        studio.ban && studio.block
+                          ? "bg-red-500"
+                          : studio.block && !studio.ban
+                          ? "bg-orange-400"
+                          : "bg-[#8c0707]"
+                      }
+                      
+                      text-white rounded-full px-4 capitalize text-[14px]`}
                     >
-                      {!studio.block ? "active" : "blocked"}
+                      {studio.ban && studio.block
+                        ? "Ban"
+                        : studio.block && !studio.ban
+                        ? "Block"
+                        : "Active"}
                     </p>
                     {/* {(? "active" : "blocked")} */}
                   </div>
@@ -224,6 +247,40 @@ export default function Studios() {
                         ₦<ReadStudioRevenue id={studio?._id} />
                       </span>
                     </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {studio?.ban ? (
+                          <DropdownMenuItem
+                            className="text-green-500"
+                            onClick={() => {
+                              unbanStudio(studio?._id).then(() => {
+                                // mutate(`/view-all-studios/`);
+                              });
+                            }}
+                          >
+                            <LockOpen className="w-4 h-4 mr-2" />
+                            Release Studio
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => {
+                              banStudio(studio?._id).then(() => {
+                                // mutate(`/view-all-studios/`);
+                              });
+                            }}
+                          >
+                            <Ban className="w-4 h-4 mr-2" />
+                            Ban Studio
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </Card>
@@ -233,7 +290,7 @@ export default function Studios() {
           <Card className="bg-gradient-card shadow-card">
             <div className="p-6">
               <div className="space-y-4">
-                {filteredStudios.map((studio) => (
+                {currentItems.map((studio) => (
                   <div
                     key={studio.id}
                     className="flex items-center space-x-4 p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
@@ -252,7 +309,17 @@ export default function Studios() {
                         <h4 className="font-semibold text-foreground">
                           {studio.studioName}
                         </h4>
-                        {getStatusBadge(!studio.block ? "active" : "blocked")}
+                        <p
+                          className={`${
+                            !studio.block ? "bg-[#8c0707]" : "bg-orange-400"
+                          } text-white rounded-full px-4 capitalize text-[14px]`}
+                        >
+                          {studio.ban && studio.block
+                            ? "Ban"
+                            : studio.block && !studio.ban
+                            ? "Block"
+                            : "Active"}
+                        </p>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         by <ReadUser id={studio?.accountHolderID} />
@@ -263,8 +330,8 @@ export default function Studios() {
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="flex items-center space-x-1 mb-1">
+                    <div className="text-right ">
+                      <div className="flex items-center space-x-1 mb-1 ">
                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
                         <span className="font-medium">
                           {studio.studioRate || 0}
@@ -297,6 +364,15 @@ export default function Studios() {
             </div>
           </Card>
         )}
+      </div>
+      <div className="flex-1" />
+
+      <div className="mt-20">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

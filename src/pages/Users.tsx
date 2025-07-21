@@ -24,6 +24,8 @@ import {
   useReadUsers,
 } from "../hooks/use-users";
 import _ from "lodash";
+import Pagination from "../lib/pagination";
+import { deleteAccount } from "../api/usersAPI";
 
 export default function Users() {
   const { data } = useReadUsers();
@@ -33,6 +35,9 @@ export default function Users() {
   // Ensure data is an array before filtering
   const safeData = Array.isArray(data) ? data : [];
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
   const filteredUsers = safeData.filter((user) => {
     const matchesSearch = user?.email
       ?.toLowerCase()
@@ -41,6 +46,18 @@ export default function Users() {
       statusFilter === "all" || user?.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(safeData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUsers
+    ?.reverse()
+    .slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    setCurrentPage(pageNumber);
+  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -57,7 +74,7 @@ export default function Users() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-[calc(100vh-120px)] flex flex-col ">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -68,10 +85,6 @@ export default function Users() {
             Manage and monitor platform users
           </p>
         </div>
-
-        <Button className="bg-[#8c090c] hover:bg-primary-hover">
-          Export Users
-        </Button>
       </div>
 
       {/* Filters */}
@@ -116,10 +129,10 @@ export default function Users() {
       <Card className="bg-gradient-card shadow-card">
         <div className="p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">
-            Users ({safeData.length})
+            Users ({currentItems?.length})
           </h3>
 
-          {safeData.length === 0 ? (
+          {currentItems?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No users found
             </div>
@@ -137,14 +150,14 @@ export default function Users() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((user: any) => (
+                  {currentItems.map((user: any) => (
                     <TableRow
                       key={user._id}
                       className="border-border hover:bg-muted/50"
                     >
                       <TableCell>
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          <div className="w-10 h-10 bg-[#8c090c]/5 rounded-full flex items-center justify-center">
                             {user?.avatar ? (
                               <img
                                 src={user?.avatar}
@@ -152,7 +165,7 @@ export default function Users() {
                                 className="w-10 h-10 rounded-full"
                               />
                             ) : (
-                              <span className="text-sm font-medium text-primary">
+                              <span className="text-sm font-medium text-[#8c090c]">
                                 {user?.firstName?.charAt(0)?.toUpperCase() ||
                                   "U"}
                               </span>
@@ -169,7 +182,11 @@ export default function Users() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(user?.status || "unknown")}
+                        {/* {getStatusBadge(user?.status || "unknown")} */}
+
+                        <div className="text-[#8c090c] bg-[#8c090c]/5 flex justify-center items-center rounded-full py-1 font-[500] text-[12px] ">
+                          {user?.status}
+                        </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {user?.createdAt
@@ -192,19 +209,16 @@ export default function Users() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit User
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => {
+                                deleteAccount(user?._id);
+                              }}
+                            >
                               <Ban className="w-4 h-4 mr-2" />
-                              {user?.status === "active"
+                              {user?.status === "users"
                                 ? "Suspend User"
-                                : "Reactivate User"}
+                                : "Delete User"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -217,6 +231,14 @@ export default function Users() {
           )}
         </div>
       </Card>
+      <div className="flex-1" />
+      <div className="">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 }

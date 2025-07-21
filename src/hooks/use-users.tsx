@@ -20,14 +20,15 @@ export const useReadUsers = () => {
 };
 
 export const useReadStudios = () => {
-  const { data: studios } = useSWR(`/view-all-studios/`, () => {
+  const { data: studios, mutate } = useSWR(`/view-all-studios/`, () => {
     return getStudios().then((res: any) => {
       return res.data;
     });
   });
 
-  return { studios };
+  return { studios, mutate };
 };
+
 
 export const useReadStudiosBookings = () => {
   const { data: bookings } = useSWR(`/view-studio-bookings/`, () => {

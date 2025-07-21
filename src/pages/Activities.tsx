@@ -27,6 +27,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { useReadActivities } from "../hooks/use-users";
+import Pagination from "../lib/pagination";
 
 const activityIcons = {
   user_signup: UserCheck,
@@ -76,6 +77,9 @@ export default function Activities() {
 
   const { activities } = useReadActivities();
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   const filteredActivities = activities?.filter((activity: any) => {
     const matchesSearch =
       activity?.action?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,8 +113,21 @@ export default function Activities() {
     return matchesSearch && matchesType && matchesTimeframe;
   });
 
+  const totalPages = Math.ceil(activities.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredActivities.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    setCurrentPage(pageNumber);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-[calc(100vh-115px)] flex flex-col ">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -254,7 +271,7 @@ export default function Activities() {
           </h3>
 
           <div className="space-y-4">
-            {filteredActivities?.map((activity: any) => {
+            {currentItems?.map((activity: any) => {
               const IconComponent =
                 activityIcons[activity?.type as keyof typeof activityIcons] ||
                 AlertCircle;
@@ -362,6 +379,16 @@ export default function Activities() {
           )}
         </div>
       </Card>
+
+      <div className="flex-1" />
+
+      <div className="mt-20">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 }

@@ -173,11 +173,11 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <Button variant="outline" className="border-border">
-            Export Data
-          </Button>
-          <Button className="bg-[#8c0707] hover:bg-primary-hover">
-            View Reports
+          <Button
+            variant="outline"
+            className="border-border opacity-35 font-[300]"
+          >
+            Viewing cross-section Data
           </Button>
         </div>
       </div>
@@ -271,7 +271,7 @@ export default function Dashboard() {
             </h3>
 
             <div className="space-y-4">
-              {activities?.map((activity) => (
+              {activities?.slice(0, 5)?.map((activity) => (
                 <div
                   key={activity._id}
                   className="flex items-start space-x-3 pb-3 border-b border-border last:border-b-0 last:pb-0"
@@ -301,43 +301,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-
-      {/* Quick Actions */}
-      <Card className="p-6 bg-gradient-card shadow-card">
-        <h3 className="text-lg font-semibold text-foreground mb-4">
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Button
-            variant="outline"
-            className="h-20 flex-col space-y-2 border-border"
-          >
-            <Users className="w-6 h-6" />
-            <span>Manage Users</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-20 flex-col space-y-2 border-border"
-          >
-            <Building2 className="w-6 h-6" />
-            <span>Review Studios</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-20 flex-col space-y-2 border-border"
-          >
-            <CreditCard className="w-6 h-6" />
-            <span>Process Payments</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-20 flex-col space-y-2 border-border"
-          >
-            <TrendingUp className="w-6 h-6" />
-            <span className="text-[#8c0707]">View Analytics</span>
-          </Button>
-        </div>
-      </Card>
     </div>
   );
 }
