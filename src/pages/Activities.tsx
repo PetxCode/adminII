@@ -136,13 +136,6 @@ export default function Activities() {
             Monitor all platform activities and system events
           </p>
         </div>
-
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" className="border-border">
-            <Filter className="w-4 h-4 mr-2" />
-            Export Log
-          </Button>
-        </div>
       </div>
 
       {/* Summary Cards */}
