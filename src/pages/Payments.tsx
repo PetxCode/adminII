@@ -114,8 +114,8 @@ export default function Payments() {
           </p>
         </div>
 
-        <Button className="bg-[#8c0707] hover:bg-[#8c0707]/50 transition-all duration-300">
-          Export Transactions
+        <Button className="bg-[#8c0707] opacity-5 hover:bg-[#8c0707]/50 transition-all duration-300">
+          viewing Transactions history
         </Button>
       </div>
 

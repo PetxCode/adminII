@@ -258,8 +258,8 @@ export default function Studios() {
                           <DropdownMenuItem
                             className="text-green-500"
                             onClick={() => {
-                              unbanStudio(studio?._id).then(() => {
-                                // mutate(`/view-all-studios/`);
+                              unbanStudio(studio?._id).then(async() => {
+                                await mutate(`/view-all-studios/`);
                               });
                             }}
                           >
@@ -270,8 +270,8 @@ export default function Studios() {
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => {
-                              banStudio(studio?._id).then(() => {
-                                // mutate(`/view-all-studios/`);
+                              banStudio(studio?._id).then(async() => {
+                                await mutate(`/view-all-studios/`);
                               });
                             }}
                           >
