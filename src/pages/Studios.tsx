@@ -259,7 +259,7 @@ export default function Studios() {
                             className="text-green-500"
                             onClick={() => {
                               unbanStudio(studio?._id).then(async() => {
-                                await mutate(`/view-all-studios/`);
+                                // await mutate(`/view-all-studios/`);
                               });
                             }}
                           >
@@ -271,7 +271,7 @@ export default function Studios() {
                             className="text-destructive"
                             onClick={() => {
                               banStudio(studio?._id).then(async() => {
-                                await mutate(`/view-all-studios/`);
+                                // await mutate(`/view-all-studios/`);
                               });
                             }}
                           >
